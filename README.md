@@ -1,31 +1,57 @@
 # AugHyE
 Official implementation of "AugHyE: flexible aligned unbound structure augmentation with hybrid encoder for robust protein binding interface prediction"
 
-## Abstract
+**TL;DR:** We propose AugHyE, a novel framework that integrates unbound structure augmentation with a
+Hybrid Encoder to enhance model robustness by training on diverse unbound structures. 
 
-**TL;DR:** We propose a novel method for tackling dynamic many-objective molecular optimization problem by utilizing objective decomposition and progressive optimization. 
+## Abstract
+Motivation: Protein binding interface prediction is fundamental to understanding biological processes and accelerating drug discovery. Recent deep learning methods have been developed to identify residues involved in protein interactions and have achieved significant performance improvements. However, their performance often degrades when applied to unbound structures, since these models are typically trained only on bound- state structures and insufficiently capture the conformational flexibility inherent to unbound structures. 
+
+Results: We propose AugHyE, a novel framework that integrates unbound structure augmentation with a Hybrid Encoder to enhance model robustness by training on diverse unbound structures. Our approach leverages a protein language model to directly generate unbound structures from protein sequences and incorporates an alignment network to ensure biophysically plausible relative positioning between the independently generated unbound ligand and receptor structures. These aligned augmented unbound structures are combined with native bound structures as a unified bound-unbound dataset, which is used to train the Hybrid Encoder that integrates local geometric features with global structural context. Our method, evaluated on the Docking Benchmark 5.5 dataset, achieves state-of-the-art performance across multiple structural scenarios, demonstrating its robustness to diverse protein conformations.
 
 ## Docker:
-Note that our code is heavily dependent on and built from the PMO benchmark code, which can be found [here](https://github.com/wenhao-gao/mol_opt).
+### Requirements
+Docker
 
-You can simply test run the AugHyE code by using the following command:
+(Optional) NVIDIA Container Toolkit (for GPU support)
+
+### Step 1. Build Docker Image
+You can simply docker image build by Dockerfile the following command:
 ```bash
-python test.py
+docker build -t [IMAGE_NAME].
 ```
+
+### Step 2. Run Container (GPU)
+```bash
+docker run -it --gpus all -v [LOCAL_PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
+```
+
 ## Conda activation:
 You can simply test run the AugHyE code by using the following command:
 ```bash
 python test.py
 ```
+
+## Notes on Reproducibility
+
+This environment is tested with:
+
+Python 3.10
+
+PyTorch 2.1.0
+
+CUDA 11.8
+
 ## Experiments:
 You can simply test run the AugHyE code by using the following command:
 ```bash
 python test.py
 ```
-Train code & unbound structure augmentation will be availible upon publication.
+Train code & unbound structure augmentation will be availible.
 
-## Colab Notebook:
-The Colab notebook for this project can be found here: [Open in Colab](https://colab.research.google.com/drive/1iiDNJDSDEqcjRJNT402hz5B3I_boN3Mw#scrollTo=9tnOBuBOprD6)
+## Dataset:
+Our test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
+Training & validation dataset will be availiblen.
 
 ### Important Note
 As of May 17, 2024, the notebook `DyMol Colab Notebook.ipynb` has been tested and is working correctly. However, please be aware that changes in library versions or updates to the Colab environment may affect its functionality in the future.
