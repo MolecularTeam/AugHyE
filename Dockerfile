@@ -7,7 +7,6 @@ WORKDIR /aughye
 # Install necessary packages
 # ------------------------------------------------------------
 ARG DEBIAN_FRONTEND=noninteractive
-ENV TZ=Asia/Seoul
 RUN apt-get update && apt-get install -y tzdata\
     cmake \
     wget \
@@ -35,7 +34,7 @@ RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.10 1
 
 # ------------------------------------------------------------
 # Install Miniforge # ------------------------------------------------------------
-RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh" && \
+    RUN curl -L -O "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh" && \
     bash Miniforge3-Linux-x86_64.sh -b -p /opt/conda && \
     rm Miniforge3-Linux-x86_64.sh
 
@@ -44,13 +43,9 @@ ENV PATH=/opt/conda/bin:$PATH
 # ------------------------------------------------------------
 # Mamba installation and package setup
 # ------------------------------------------------------------
+RUN mamba install -y python=3.10
 RUN mamba install pytorch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 pytorch-cuda=11.8 -c pytorch -c nvidia -y
-RUN mamba install -y anarci -c bioconda
-RUN mamba install openbabel
-RUN mamba install -y conda-forge::pytdc==0.3.7 conda-forge::pygmo conda-forge::dacite conda-forge::pymoo
-RUN conda install -c conda-forge pdbfixer
-RUN pip install rdkit
-RUN pip install scikit-learn==1.2.2
+
 
 # ------------------------------------------------------------
 # Copy requirements files
@@ -59,6 +54,7 @@ RUN pip install scikit-learn==1.2.2
 # Install pip dependencies
 # ------------------------------------------------------------
 RUN pip install --upgrade pip setuptools wheel
+RUN pip install scikit-learn==1.2.2
 RUN pip install wandb
 RUN pip install higher
 RUN pip install scikit-build
@@ -66,8 +62,7 @@ RUN pip install --no-cache-dir git+https://github.com/thomas-bouvier/horovod.git
 RUN pip install horovod[pytorch]
 RUN pip install torch_geometric
 RUN pip install pyg_lib torch_scatter==2.1.2 torch_sparse==0.6.18 torch_cluster==1.6.2 torch_spline_conv==1.2.2 torch_geometric -f https://data.pyg.org/whl/torch-2.1.0+cu118.html
-RUN pip install causal-conv1d>=1.4.0
-RUN pip install mamba-ssm[causal-conv1d]
+RUN pip install transformers==4.38.2
 RUN pip install pymol-open-source
 RUN pip install nglview
 RUN pip install py3Dmol
@@ -78,11 +73,9 @@ RUN pip install pandas==1.5.1
 RUN pip install fair-esm[esmfold]==2.0.0
 RUN pip install pybind11==2.11.1
 RUN pip install torchmetrics==0.11.0
-RUN pip install reinvent-chemistry==0.0.50 reinvent-models==0.0.15rc1 reinvent-scoring==0.0.73
 RUN pip install pyyaml
 RUN pip install biopython
 RUN pip install spyrmsd
-RUN pip install biopandas
 RUN pip install accelerate
 RUN pip install lmdb
 RUN pip install torchdrug
@@ -99,7 +92,20 @@ RUN pip install rich
 RUN pip install POT
 RUN pip install biopandas==0.2.8
 RUN pip install joblib==1.1.0
+RUN pip install numpy==1.23.5
 
+# ESM3
+RUN pip install \
+    cloudpathlib \
+    boto3 \
+    biotite \
+    msgpack_numpy \
+    ipywidgets \
+    pygtrie \
+    pytest \
+    pydssp \
+    dna_features_viewer \
+    tenacity
 
 # ------------------------------------------------------------
 # Add cortex path
@@ -107,4 +113,3 @@ RUN pip install joblib==1.1.0
 WORKDIR /aughye
 
 CMD [ "/bin/bash" ]
-
