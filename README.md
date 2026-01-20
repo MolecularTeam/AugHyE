@@ -27,6 +27,14 @@ docker build -t [IMAGE_NAME] .
 docker run -it --gpus all -v [PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
 ```
 
+### Step 3. Install mamba framework (GPU-version)
+Install `mamba-ssm` and `causal-conv1d` **after running the container with GPU**  
+(do NOT install during `docker build`).
+```bash
+pip install --no-build-isolation causal-conv1d==1.4.0
+pip install --no-build-isolation mamba-ssm[causal-conv1d]
+```
+
 ## Conda activation:
 
 
