@@ -48,7 +48,7 @@ Data construction & unbound structure augmentation code will be availible.
 ## Dataset:
 Our test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
 
-Training & validation dataset will be availiblen.
+Training & validation dataset will be availible.
 
 ### Important Note
 As of January 20, 2026, the test code has been updated and is working correctly.
