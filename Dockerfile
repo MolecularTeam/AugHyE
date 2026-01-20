@@ -91,8 +91,7 @@ RUN pip install omegaconf
 RUN pip install rich
 RUN pip install POT
 RUN pip install biopandas==0.2.8
-RUN pip install joblib==1.1.0
-RUN pip install numpy==1.23.5
+RUN pip install joblib==1.1.1
 
 # ESM3
 RUN pip install \
