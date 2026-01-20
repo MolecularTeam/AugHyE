@@ -35,11 +35,16 @@ python test.py
 
 This environment is tested with:
 
+CUDA 11.8
+
 Python 3.10
 
 PyTorch 2.1.0
 
-CUDA 11.8
+Torch_geometric
+
+dgl
+
 
 ## Experiments:
 You can simply test run the AugHyE test code by using the following command:
