@@ -1,12 +1,6 @@
 import os
 import sys
 sys.path.append(".")
-import glob
-import time
-import math
-import random
-import pickle
-import wandb
 import numpy as np 
 from tqdm import tqdm
 from torchmetrics.functional import average_precision, accuracy
@@ -22,7 +16,6 @@ from torch.utils.data import DataLoader
 class Base_model(nn.Module): 
     def __init__(self, args, model_args, name="Baseline_model"): 
         super(Base_model, self).__init__()  
-        # self._size = size
         self._name = name
         self.args = args
         self.model_args = model_args
@@ -47,9 +40,6 @@ class Base_model(nn.Module):
         checkpoint = torch.load(load_path, map_location=self.args['device'])
         self.net.load_state_dict(checkpoint, strict=False)  
         print('Load bip model')
-    
-    def run(self, target): 
-        pass
     
     def evaluate(self, args, data_loader, best_model_save_path, epoch_id=0): 
         pass

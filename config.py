@@ -9,15 +9,13 @@ print('Parsing args')
 
 def parseArgs():
     parser = argparse.ArgumentParser(description='PBI_prediction_AugHyE')    
-    parser.add_argument('-esm', default=True)
     parser.add_argument('-device', type=str, default='0', help='device (e.g., "cuda:0", "cuda:1", or "cpu")')
     parser.add_argument('-timestamp', type=str, default=datetime.datetime.today().strftime("%Y%m%d%H%M%S"))
     # Data
     parser.add_argument('-bsp_threshold', default=8.0, type=float, required=False)
     parser.add_argument('-dataset', default='db5', type=str, required=False) # db5
     parser.add_argument('-data_path', default='data/', type=str, required=False)
-    parser.add_argument('-bound_type', default='bound', type=str, required=False)  # train -> bound val&test -> bound or unbound
-    parser.add_argument('-esm3', default=False, required=False, action='store_true')  # action='store_true' -> True, False가 아닌 그냥 esm 인자를 넣으면 True, 아니면 False
+    parser.add_argument('-bound_type', default='bound', type=str, required=False)  
 
     # Optim and Scheduler
     parser.add_argument('-n_epochs', default=30, type=int, required=False)
@@ -38,7 +36,7 @@ def parseArgs():
     parser.add_argument('-atten_head', type=int, default=4, required=False) 
     parser.add_argument('-translation_interval', default=10.0, type=float, required=False, help='translation interval')
     parser.add_argument('-nonlin', type=str, default='lkyrelu', choices=['swish', 'lkyrelu'])
-    parser.add_argument('-dp_encoder', type=float, default=0.2, required=False)  # default 0.2
+    parser.add_argument('-dp_encoder', type=float, default=0.2, required=False)  
     parser.add_argument('-dp_cls', type=float, default=0., required=False)
     parser.add_argument('-dropout', type=float, default=0.2)
 

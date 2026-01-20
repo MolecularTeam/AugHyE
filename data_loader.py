@@ -8,10 +8,8 @@ from sklearn.neighbors import BallTree
 from biopandas.pdb import PandasPdb
 import torch
 from torch.utils.data import DataLoader
-# from data_atprot_graph_construction import DockingDataset_aug, DockingDataset_aug_align, batchify_and_create_respective_graphs
-# import SASNet.data_loader
 import dgl
-import math
+
 
 from alignment_network.rigid_docking_model import *
 
@@ -20,7 +18,6 @@ def create_model_equidock(args, log=None):
     return Rigid_Body_Docking_Net(args=args, log=log)
 
 
-## atprot만 사용
 class DockingDataset_aug_align(Dataset):
 
     def __init__(self, args, alignment_model, data_set, reload_mode, raw_data_path, load_from_cache=True, bound_type='bound'):
@@ -35,7 +32,7 @@ class DockingDataset_aug_align(Dataset):
                 self.data_bound = pickle.load(open(os.path.join(raw_data_path, reload_mode + f'.pkl'), 'rb'))
                 
                 ### augmented unbound structure alignment
-                # alignment network           
+                # 3D space alignment of unbound structures          
                 if args['u_b_align'] == "equidock":
                     self.unbound_indices = np.arange(len(self.data_unbound))    
                     with torch.inference_mode():  
@@ -176,12 +173,12 @@ class DockingDataset_aug_align(Dataset):
         if 'new_x' not in rec_graph.ndata:
             rec_graph.ndata['new_x'] = rec_graph.ndata['x']
 
-        data_item = {'rec_pos': zerocopy_from_numpy(rec_pos.astype(np.float32)),  # x,y,z coordinate
-                     'lig_pos': zerocopy_from_numpy(lig_pos.astype(np.float32)),  # x,y,z coordinate
-                     'rec_atom': zerocopy_from_numpy(rec_atom.astype(np.int64)),  # amino acid number
-                     'lig_atom': zerocopy_from_numpy(lig_atom.astype(np.int64)),  # amino acid number
-                     'rec_seq': rec_seq,  # amino acid number
-                     'lig_seq': lig_seq,  # amino acid number
+        data_item = {'rec_pos': zerocopy_from_numpy(rec_pos.astype(np.float32)),  
+                     'lig_pos': zerocopy_from_numpy(lig_pos.astype(np.float32)),  
+                     'rec_atom': zerocopy_from_numpy(rec_atom.astype(np.int64)),  
+                     'lig_atom': zerocopy_from_numpy(lig_atom.astype(np.int64)),  
+                     'rec_seq': rec_seq,  
+                     'lig_seq': lig_seq,  
                      'bsp_rec':bsp_rec,
                      'bsp_lig':bsp_lig,
                      'lig_graph':lig_graph,
@@ -293,11 +290,17 @@ def dataset_selection(args):
 
     args['u_b_align'] = "equidock"
     alignment_model = create_model_equidock(args).to(args['device'])
-    aligment_path = 'model_weight/' + f"alignment_model_best.pth"  # 파일명 수정 
+    aligment_path = 'model_weight/' + f"alignment_model_best.pth" 
     print("alignment network load :", aligment_path)
     alignment_model.load_state_dict(torch.load(aligment_path, map_location=args['device']), strict=False)
     print("alignment network load completed")
     
+    train_dataset = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='train', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
+    train_dataloader = DataLoader(train_dataset, batch_size=args['bs'], shuffle=True, collate_fn=batchify_and_create_respective_graphs)
+    
+    val_dataset = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='val', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
+    val_dataloader = DataLoader(val_dataset, batch_size=args['bs'], shuffle=False, collate_fn=batchify_and_create_respective_graphs)
+        
     test_dataset_native_bound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_bound')
     test_dataloader_native_bound = DataLoader(test_dataset_native_bound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
@@ -307,4 +310,4 @@ def dataset_selection(args):
     test_dataset_native_unbound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_unbound')
     test_dataloader_native_unbound = DataLoader(test_dataset_native_unbound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
-    return test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound
+    return train_dataloader, val_dataloader, test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound

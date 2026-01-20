@@ -1,16 +1,5 @@
-
-# os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # atprot_model 폴더를 import 경로에 추가
-# warnings.filterwarnings("ignore", category=FutureWarning, module="torch")
-# from importlib import import_module
-# import wandb
-
 import os
-import sys
-from datetime import datetime
-now = datetime.now()
 from data_loader import dataset_selection
-import warnings
 import torch 
 from model.AugHyE import *
 from config import parseArgs
@@ -27,7 +16,7 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         model.to(args['device'])
 
-    test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound = dataset_selection(args)
+    _, _, test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound = dataset_selection(args)
 
     # model load
     load_dir = f"model_weight/"  # local dir

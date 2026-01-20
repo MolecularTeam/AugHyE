@@ -28,8 +28,6 @@ def get_final_h_layer_norm(layer_norm_type, dim):
         return nn.BatchNorm1d(dim)
     elif layer_norm_type == 'LN':
         return nn.LayerNorm(dim)
-    # elif layer_norm_type == 'GN':
-    #     return GraphNorm(dim)
     else:
         assert layer_norm_type == '0'
         return nn.Identity()

@@ -128,8 +128,8 @@ def compute_cross_attention(queries, keys, values, mask, cross_msgs):
     if not cross_msgs:
         return queries * 0.
     a = mask * torch.mm(queries, torch.transpose(keys, 1, 0)) - 1000. * (1. - mask)
-    a_x = torch.softmax(a, dim=1)  # i->j, NxM, a_x.sum(dim=1) = torch.ones(N)
-    attention_x = torch.mm(a_x, values)  # (N,d)
+    a_x = torch.softmax(a, dim=1)  
+    attention_x = torch.mm(a_x, values) 
     return attention_x
 
 
@@ -142,7 +142,6 @@ def dgl_to_dense_batch(x, batch):
     dense_x = torch.zeros((batch_size, max_nodes, num_features), device=x.device)
     mask = torch.zeros((batch_size, max_nodes), dtype=torch.bool, device=x.device)
 
-    # 노드 피처를 그래프별로 밀집 형태로 채움
     for graph_id in range(batch_size):
         node_indices = (batch == graph_id).nonzero(as_tuple=True)[0]
         num_nodes = node_indices.size(0)
@@ -152,8 +151,8 @@ def dgl_to_dense_batch(x, batch):
     return dense_x, mask
 
 def get_mask(ligand_batch, receptor_batch, device):
-    ligand_batch_num_nodes = torch.bincount(ligand_batch).tolist()  # 각 ligand 그래프의 노드 수
-    receptor_batch_num_nodes = torch.bincount(receptor_batch).tolist()  # 각 receptor 그래프의 노드 수
+    ligand_batch_num_nodes = torch.bincount(ligand_batch).tolist()  
+    receptor_batch_num_nodes = torch.bincount(receptor_batch).tolist() 
     
     rows = sum(ligand_batch_num_nodes)
     cols = sum(receptor_batch_num_nodes)
@@ -173,7 +172,6 @@ class SEGCN_mamba_Layer(nn.Module):
         super(SEGCN_mamba_Layer, self).__init__()
         self.args = args
         hidden = args['h_dim']
-        e_hidden = args['e_dim']
         coe = 5 + 27
         self.device = args['device']
         # EDGES
@@ -188,10 +186,10 @@ class SEGCN_mamba_Layer(nn.Module):
             nn.Linear(hidden, 1),
         )
         
-        # local
+        # local BernNet
         self.bern_1 = Bern_prop(K=args['bern_k'])
 
-        # global mamba
+        # global SSM
         self.cross_msgs = True 
         self.self_attn = Mamba(d_model=args['h_dim'],  # Model dimension d_model
                                d_state=16,  # SSM state expansion factor
@@ -269,11 +267,10 @@ class SEGCN_mamba_Layer(nn.Module):
         edge_index_1 = torch.stack(batch_1_graph.edges())
         edge_index_2 = torch.stack(batch_2_graph.edges())
 
-        ## local Bernpro
+        ## local BernNet
         h_lig_local, TEMP_1 = self.bern_1(batch_1_graph.ndata['pro_h'], edge_index_1.long(), weight_lap_1.T.squeeze(0))
         h_rec_local, TEMP_2 = self.bern_1(batch_2_graph.ndata['pro_h'], edge_index_2.long(), weight_lap_2.T.squeeze(0))
 
-            
         h_lig_out_list.append(h_lig_local)
         h_rec_out_list.append(h_rec_local)
 
@@ -386,7 +383,6 @@ class SEGCN_mamba_Layer(nn.Module):
     
     
     
-    
 class CrossAttentionLayer(nn.Module):
     def __init__(self,args):
         # super().__init__()
@@ -463,8 +459,7 @@ class SEGCN(nn.Module):
         self.c_a_layer = CrossAttentionLayer(args)
         self.n_layer = args['SEGCN_layer']
 
-
-        print("global segcn_layer mamba")
+        # BernNet + SSM
         self.segcn_layers = nn.ModuleList()
         self.segcn_layers.append(SEGCN_mamba_Layer(args))
 
@@ -533,14 +528,14 @@ class SEGCN(nn.Module):
         h_feats_2 = self.residue_emb_layer(
             torch.argmax(batch_2_graph.ndata['res_feat'], dim=1).unsqueeze(1).view(-1).long())  # (N_res, emb_dim)
         
-        if self.args['res_feat']:  # atom embedding
+        if self.args['res_feat']: 
             node_feat_1 = torch.cat([node_feat_1, h_feats_1], dim=1)
             node_feat_2 = torch.cat([node_feat_2, h_feats_2], dim=1)
 
         if self.args['mu_r_norm']:
             node_feat_1 = torch.cat([node_feat_1, torch.log(batch_1_graph.ndata['mu_r_norm'])], dim=1)
             node_feat_2 = torch.cat([node_feat_2, torch.log(batch_2_graph.ndata['mu_r_norm'])], dim=1)
-            
+        
         batch_1_graph.ndata['pro_h'] = self.fea_norm_mlp(node_feat_1)  
         batch_2_graph.ndata['pro_h'] = self.fea_norm_mlp(node_feat_2)  
         
@@ -557,7 +552,7 @@ class SEGCN(nn.Module):
             h_2 = list_graph_2[ii].ndata['hv_segcn_out']            
             h_2_ca = self.c_a_layer(h_1,h_2,[h_1.size(0)],[h_2.size(0)])
             h_1_ca = self.c_a_layer(h_2,h_1,[h_2.size(0)],[h_1.size(0)])
-
+            
             pred_proxy1 = torch.cat((self.clsf1(h_1_ca), self.clsf1(h_2_ca)), dim=0)
             pred_proxy2 = torch.cat((self.clsf2(h_1_ca), self.clsf2(h_2_ca)), dim=0)
             pred_proxy3 = torch.cat((self.clsf3(h_1_ca), self.clsf3(h_2_ca)), dim=0)
@@ -582,16 +577,9 @@ class AugHyE(nn.Module):
         self.log=log
         self.args = args
         self.device = args['device']
-
+        
+        # Hybrid Encoder
         self.segcn_original = SEGCN(args, n_lays=args['SEGCN_layer'], fine_tune=False, log=log)
-
-    
-        # if args['fine_tune']:
-        #     self.segcn_fine_tune = SEGCN(args, n_lays=2, fine_tune=True, log=log)
-        #     self.list_segcns = [('original', self.segcn_original), ('finetune', self.segcn_fine_tune)]
-        # else:
-        #     self.list_segcns = [('finetune', self.segcn_original)]  ## just original
-    
         
     def reset_parameters(self):
         for p in self.parameters():
@@ -676,7 +664,7 @@ class AugHyE_model(Base_model):
                 batch_auc_list = []
                 
                 for i in range(len(pre_interface_list)):
-                    bsp_pred = pre_interface_list[i].squeeze()  # output: with softmax and list type
+                    bsp_pred = pre_interface_list[i].squeeze() 
                     label = torch.cat([bsp_lig[i], bsp_rec[i]], dim=0).to(self.args['device'])
                     
                     bsp_loss = int_criterion(bsp_pred, label)
@@ -690,7 +678,6 @@ class AugHyE_model(Base_model):
                     auc_list.append(roc_auc_score(label_np, bsp_pred_np))
                 
                 batch_num = len(pre_interface_list)
-                
                 ## total loss
                 loss = batch_interface_loss/batch_num + self.args['sr_loss_ratio'] * batch_stable_loss 
 
@@ -718,7 +705,7 @@ class AugHyE_model(Base_model):
             avg_loss, total_loss, total_ap, total_auc = 0., 0., 0, 0
             total_interface_loss, total_stable_loss = 0., 0.
             auc_list = []
-            tqdm.write(f"[Epoch {epoch_id}] Testing")
+            tqdm.write(f"[Epoch {epoch_id}] Validation")
             with torch.inference_mode():
                 # progress = tqdm(val_loader)
                 loop = tqdm(val_loader, total=len(val_loader), leave=True, dynamic_ncols=True)
@@ -740,7 +727,7 @@ class AugHyE_model(Base_model):
                     batch_auc_list = []
                     
                     for i in range(len(pre_interface_list)):
-                        bsp_pred = pre_interface_list[i].squeeze()  # output: with softmax and list type
+                        bsp_pred = pre_interface_list[i].squeeze()  
                         label = torch.cat([bsp_lig[i], bsp_rec[i]], dim=0).to(self.args['device'])
 
                         bsp_loss = int_criterion(bsp_pred, label)
@@ -755,6 +742,7 @@ class AugHyE_model(Base_model):
                         auc_list.append(roc_auc_score(label_np, bsp_pred_np))
                     
                     batch_num = len(pre_interface_list)
+                    ## total loss
                     loss = batch_interface_loss/batch_num + self.args['sr_loss_ratio'] * batch_stable_loss 
                     
                     loop.set_postfix(loss=loss.item(), bsp_loss=(batch_interface_loss/batch_num).item(), stable_loss=batch_stable_loss.item(), 
@@ -767,11 +755,11 @@ class AugHyE_model(Base_model):
                     total_auc += batch_auc/batch_num
                     auc_median = np.median(np.array(auc_list))
 
-                Val_loss_epoch = total_loss / len(train_loader)
-                Val_interface_loss_epoch = total_interface_loss / len(train_loader)
-                Val_stable_loss_epoch = total_stable_loss / len(train_loader)
-                Val_AP = total_ap.item() / len(train_loader)
-                Val_metric = total_auc.item() / len(train_loader)
+                Val_loss_epoch = total_loss / len(val_loader)
+                Val_interface_loss_epoch = total_interface_loss / len(val_loader)
+                Val_stable_loss_epoch = total_stable_loss / len(val_loader)
+                Val_AP = total_ap.item() / len(val_loader)
+                Val_metric = total_auc.item() / len(val_loader)
                 Val_AUC_median = auc_median.item()
                 
                 print('Epoch [TRAIN]: ', epoch_id,
@@ -795,9 +783,9 @@ class AugHyE_model(Base_model):
     def evaluate(self, args, data_loader, best_model_save_path, bound_type="bound"): 
         
         self.load(best_model_save_path)
-        
         self.net.eval()
         self.args['train_mode'] = 'val'
+        
         total_loss, total_ap = 0., 0.
         total_interface_loss, total_stable_loss = 0., 0.
         auc_list = []
@@ -822,7 +810,7 @@ class AugHyE_model(Base_model):
                 batch_auc_list = []
                         
                 for i in range(len(pre_interface_list)):
-                    bsp_pred = pre_interface_list[i].squeeze()  # output: with softmax and list type
+                    bsp_pred = pre_interface_list[i].squeeze() 
                     label = torch.cat([bsp_lig[i], bsp_rec[i]], dim=0).to(self.args['device'])  
                     
                     bsp_loss = int_criterion(bsp_pred, label)
@@ -836,6 +824,7 @@ class AugHyE_model(Base_model):
                     auc_list.append(roc_auc_score(label_np, bsp_pred_np))
                 
                 batch_num = len(pre_interface_list)
+                ## total loss
                 loss = batch_interface_loss/batch_num + self.args['sr_loss_ratio'] * batch_stable_loss 
                 
                 loop.set_postfix(loss=loss.item(), bsp_loss=(batch_interface_loss/batch_num).item(), stable_loss=batch_stable_loss.item(), 
