@@ -31,6 +31,7 @@ docker run -it --gpus all -v [PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
 Install `mamba-ssm` and `causal-conv1d` **after running the container with GPU**  
 (do NOT install during `docker build`).
 ```bash
+pip install numpy==1.23.5 (numpy version != 1.23.5)
 pip install --no-build-isolation causal-conv1d==1.4.0
 pip install --no-build-isolation mamba-ssm[causal-conv1d]
 ```
@@ -46,6 +47,7 @@ This environment is tested with the following **key packages
 - Torch_geometric
 - dgl
 - mamba-ssm 2.2.2
+- numpy 1.23.5
 
 ## Experiments:
 You can simply test run the AugHyE test code by using the following command:
