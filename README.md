@@ -11,18 +11,18 @@ Results: We propose AugHyE, a novel framework that integrates unbound structure 
 
 ## Docker:
 ### Requirements
-- Docker
+- Docker Installation
 - NVIDIA Container Toolkit (for GPU support)
 
 ### Step 1. Build Docker Image
-You can simply docker image build by Dockerfile the following command:
+You can simply build docker image by Dockerfile the following command:
 ```bash
 docker build -t [IMAGE_NAME].
 ```
 
 ### Step 2. Run Container (GPU)
 ```bash
-docker run -it --gpus all -v [LOCAL_PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
+docker run -it --gpus all -v [PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
 ```
 
 ## Conda activation:
@@ -42,16 +42,16 @@ PyTorch 2.1.0
 CUDA 11.8
 
 ## Experiments:
-You can simply test run the AugHyE code by using the following command:
+You can simply test run the AugHyE test code by using the following command:
 ```bash
 python test.py
 ```
-Train code & unbound structure augmentation will be availible.
+Data construction & unbound structure augmentation code will be availible.
 
 ## Dataset:
 Our test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
 Training & validation dataset will be availiblen.
 
 ### Important Note
-As of May 17, 2024, the notebook `DyMol Colab Notebook.ipynb` has been tested and is working correctly. However, please be aware that changes in library versions or updates to the Colab environment may affect its functionality in the future.
+As of January 20, 2026, the test code has been updated and is working correctly.
 
