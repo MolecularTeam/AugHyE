@@ -36,7 +36,7 @@ pip install --no-build-isolation mamba-ssm[causal-conv1d]
 ```
 
 ## Conda activation:
-
+A Conda virtual environment setup will be available.
 
 ## Notes on Reproducibility
 
@@ -45,6 +45,7 @@ This environment is tested with the following **key packages
 - PyTorch 2.1.0 (CUDA 11.8)
 - Torch_geometric
 - dgl
+- mamba-ssm 2.2.2
 
 ## Experiments:
 You can simply test run the AugHyE test code by using the following command:
