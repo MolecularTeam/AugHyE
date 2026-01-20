@@ -15,6 +15,8 @@ Results: We propose AugHyE, a novel framework that integrates unbound structure 
 - NVIDIA Container Toolkit (for GPU support)
 
 ### Step 1. Build Docker Image
+Make sure to run the build command in the directory containing the Dockerfile.
+
 You can simply build docker image by Dockerfile the following command:
 ```bash
 docker build -t [IMAGE_NAME].
@@ -26,10 +28,7 @@ docker run -it --gpus all -v [PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
 ```
 
 ## Conda activation:
-You can simply test run the AugHyE code by using the following command:
-```bash
-python test.py
-```
+
 
 ## Notes on Reproducibility
 
