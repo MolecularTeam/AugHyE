@@ -2,7 +2,7 @@
 # Base image
 # ------------------------------------------------------------
 FROM nvidia/cuda:11.8.0-devel-ubuntu22.04
-WORKDIR /yh
+WORKDIR /aughye
 # ------------------------------------------------------------
 # Install necessary packages
 # ------------------------------------------------------------
@@ -107,3 +107,4 @@ RUN pip install joblib==1.1.0
 WORKDIR /aughye
 
 CMD [ "/bin/bash" ]
+
