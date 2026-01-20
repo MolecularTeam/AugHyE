@@ -287,7 +287,7 @@ def batchify_and_create_respective_graphs(data):
 
 
 def dataset_selection(args):
-
+    # 3D alignment network
     args['u_b_align'] = "equidock"
     alignment_model = create_model_equidock(args).to(args['device'])
     aligment_path = 'model_weight/' + f"alignment_model_best.pth" 
