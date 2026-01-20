@@ -32,18 +32,11 @@ docker run -it --gpus all -v [PROJECT_DIR]:/[WORKSPACE] [IMAGE_NAME]
 
 ## Notes on Reproducibility
 
-This environment is tested with:
-
-CUDA 11.8
-
-Python 3.10
-
-PyTorch 2.1.0
-
-Torch_geometric
-
-dgl
-
+This environment is tested with the following **key packages 
+- Python 3.10 
+- PyTorch 2.1.0 (CUDA 11.8)
+- Torch_geometric
+- dgl
 
 ## Experiments:
 You can simply test run the AugHyE test code by using the following command:
@@ -54,6 +47,7 @@ Data construction & unbound structure augmentation code will be availible.
 
 ## Dataset:
 Our test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
+
 Training & validation dataset will be availiblen.
 
 ### Important Note
