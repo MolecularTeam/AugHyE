@@ -64,3 +64,4 @@ Training & validation dataset will be availible.
 ### Important Note
 As of January 20, 2026, the test code has been updated and is working correctly.
 
+If it does not work, please contact us by email. (deokjoong@korea.ac.kr)
