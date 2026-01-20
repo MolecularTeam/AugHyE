@@ -19,7 +19,7 @@ Make sure to run the build command in the directory containing the Dockerfile.
 
 You can simply build docker image by Dockerfile the following command:
 ```bash
-docker build -t [IMAGE_NAME].
+docker build -t [IMAGE_NAME] .
 ```
 
 ### Step 2. Run Container (GPU)
