@@ -11,9 +11,8 @@ Results: We propose AugHyE, a novel framework that integrates unbound structure 
 
 ## Docker:
 ### Requirements
-Docker
-
-(Optional) NVIDIA Container Toolkit (for GPU support)
+- Docker
+- NVIDIA Container Toolkit (for GPU support)
 
 ### Step 1. Build Docker Image
 You can simply docker image build by Dockerfile the following command:
