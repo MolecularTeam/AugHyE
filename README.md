@@ -46,6 +46,9 @@ This environment is tested with the following **key packages
 - dgl 2.4.0 (CUDA 11.8)
 - mamba-ssm 2.2.2
 - numpy 1.23.5
+- e3nn==0.5.0
+- fair-esm==2.0.0
+
 
 ## Experiments:
 You can simply run the AugHyE test code by using the following command:
