@@ -286,8 +286,8 @@ def batchify_and_create_respective_graphs(data):
 
 
 
-def dataset_selection(args):
-    # 3D alignment network
+def training_dataset(args):
+
     args['u_b_align'] = "equidock"
     alignment_model = create_model_equidock(args).to(args['device'])
     aligment_path = 'model_weight/' + f"alignment_model_best.pth" 
@@ -301,6 +301,18 @@ def dataset_selection(args):
     val_dataset = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='val', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
     val_dataloader = DataLoader(val_dataset, batch_size=args['bs'], shuffle=False, collate_fn=batchify_and_create_respective_graphs)
         
+    return train_dataloader, val_dataloader
+
+
+def test_dataset(args):
+
+    args['u_b_align'] = "equidock"
+    alignment_model = create_model_equidock(args).to(args['device'])
+    aligment_path = 'model_weight/' + f"alignment_model_best.pth" 
+    print("alignment network load :", aligment_path)
+    alignment_model.load_state_dict(torch.load(aligment_path, map_location=args['device']), strict=False)
+    print("alignment network load completed")
+    
     test_dataset_native_bound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_bound')
     test_dataloader_native_bound = DataLoader(test_dataset_native_bound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
@@ -310,4 +322,4 @@ def dataset_selection(args):
     test_dataset_native_unbound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_unbound')
     test_dataloader_native_unbound = DataLoader(test_dataset_native_unbound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
-    return train_dataloader, val_dataloader, test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound
+    return test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound
