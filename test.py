@@ -1,5 +1,5 @@
 import os
-from data_loader import dataset_selection
+from data_loader import test_dataset
 import torch 
 from model.AugHyE import *
 from config import parseArgs
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         model.to(args['device'])
 
-    _, _, test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound = dataset_selection(args)
+    test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound = test_dataset(args)
 
     # model load
     load_dir = f"model_weight/"  # local dir
@@ -39,3 +39,4 @@ if __name__ == "__main__":
     test_loss, test_AP, test_AUC_median = \
         model.evaluate(args, test_dataloader_native_unbound, best_model_save_path, bound_type="native_unbound")
     print(f"test_AP: {test_AP}, test_AUC: {test_AUC_median}")
+
