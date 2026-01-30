@@ -249,7 +249,6 @@ class SEGCN_mamba_Layer(nn.Module):
         h_rec_in1 = h_rec  # for first residual connection
         h_rec_out_list = []
 
-        batch_2_graph.ndata['new_x_flex'] = batch_2_graph.ndata['new_x_flex'].to(torch.float)
         batch_1_graph.apply_edges(fn.u_sub_v('new_x_flex', 'new_x_flex', 'x_dis'))  ## x_i - x_j
         batch_2_graph.apply_edges(fn.u_sub_v('new_x_flex', 'new_x_flex', 'x_dis'))
         edge_tmp_1 = batch_1_graph.edata['x_dis'] ** 2
