@@ -14,11 +14,10 @@ import dgl
 from alignment_network.rigid_docking_model import *
 
 def create_model_equidock(args, log=None):
-    # assert 'input_edge_feats_dim' in args.keys(), 'get_loader has to be called before create_model.'
     return Rigid_Body_Docking_Net(args=args, log=log)
 
 
-class DockingDataset_aug_align(Dataset):
+class DockingDataset(Dataset):
 
     def __init__(self, args, alignment_model, data_set, reload_mode, raw_data_path, load_from_cache=True, bound_type='bound'):
         self.args = args
@@ -106,9 +105,10 @@ class DockingDataset_aug_align(Dataset):
                                 ligand_pred, receptor_pred, \
                                 _, _, \
                                 _, _, _, _,  = self.alignment_model(hetero_graph, epoch=0)
-                                        
+                                
                                 self.data[i]['lig_pos'] = ligand_pred[0].detach().cpu().numpy()
                                 self.data[i]['rec_pos'] = receptor_pred[0].detach().cpu().numpy()
+
                             print("total pairs: ", len(self.data))
                             print("Unbound to bound Alignment completed")
                     
@@ -135,10 +135,11 @@ class DockingDataset_aug_align(Dataset):
             else:
                 idx_unbound = idx - len(self.data_bound)
                 data = self.data_unbound[idx_unbound]
-            rec_pos = data['rec_pos']
+            
             lig_pos = data['lig_pos']
-            rec_atom = data['rec_atom']
+            rec_pos = data['rec_pos']
             lig_atom = data['lig_atom']
+            rec_atom = data['rec_atom']
             bsp_lig = data['bsp_lig']
             bsp_rec = data['bsp_rec']
             lig_seq = data['lig_seq']
@@ -148,10 +149,10 @@ class DockingDataset_aug_align(Dataset):
             file_name = data['filename']
                         
         elif self.reload_mode != "train":
-            rec_pos = self.data[idx]['rec_pos']
             lig_pos = self.data[idx]['lig_pos']
-            rec_atom = self.data[idx]['rec_atom']
+            rec_pos = self.data[idx]['rec_pos']
             lig_atom = self.data[idx]['lig_atom']
+            rec_atom = self.data[idx]['rec_atom']
             bsp_lig = self.data[idx]['bsp_lig']
             bsp_rec = self.data[idx]['bsp_rec']
             lig_seq = self.data[idx]['lig_seq']
@@ -160,29 +161,20 @@ class DockingDataset_aug_align(Dataset):
             rec_graph = self.data[idx]['rec_graph']
             file_name = self.data[idx]['filename']
             
-        # Randomly rotate and translate the ligand.
-        rot_T, rot_b = UniformRotation_Translation(translation_interval=self.args['translation_interval'])
-        ligand_original_loc = lig_graph.ndata['x'].detach().numpy()
-        mean_to_remove = ligand_original_loc.mean(axis=0, keepdims=True)
-        ligand_new_loc = (rot_T @ (ligand_original_loc - mean_to_remove).T).T + rot_b
-        lig_graph.ndata['new_x_flex'] = zerocopy_from_numpy(ligand_new_loc.astype(np.float32))
-        rec_graph.ndata['new_x_flex'] = rec_graph.ndata['x']
+        # new_x_flex
+        lig_graph.ndata['new_x_flex'] = zerocopy_from_numpy(lig_pos.astype(np.float32))
+        rec_graph.ndata['new_x_flex'] = zerocopy_from_numpy(rec_pos.astype(np.float32))
 
-        if 'new_x' not in lig_graph.ndata:
-            lig_graph.ndata['new_x'] = lig_graph.ndata['x']
-        if 'new_x' not in rec_graph.ndata:
-            rec_graph.ndata['new_x'] = rec_graph.ndata['x']
-
-        data_item = {'rec_pos': zerocopy_from_numpy(rec_pos.astype(np.float32)),  
-                     'lig_pos': zerocopy_from_numpy(lig_pos.astype(np.float32)),  
-                     'rec_atom': zerocopy_from_numpy(rec_atom.astype(np.int64)),  
-                     'lig_atom': zerocopy_from_numpy(lig_atom.astype(np.int64)),  
-                     'rec_seq': rec_seq,  
+        data_item = {'lig_pos': lig_pos,
+                     'rec_pos': rec_pos, 
+                     'lig_atom': lig_atom,     
+                     'rec_atom': rec_atom,  
                      'lig_seq': lig_seq,  
-                     'bsp_rec':bsp_rec,
-                     'bsp_lig':bsp_lig,
-                     'lig_graph':lig_graph,
-                     'rec_graph':rec_graph,
+                     'rec_seq': rec_seq,
+                     'bsp_lig': bsp_lig,  
+                     'bsp_rec': bsp_rec,
+                     'lig_graph': lig_graph,
+                     'rec_graph': rec_graph,
                      'file_name': file_name}  
         
         return data_item
@@ -251,11 +243,11 @@ def batchify_and_create_respective_graphs(data):
     file_name_list = []
     
     for id, item in enumerate(data):
-        lig_pos_list.append(item['lig_pos'])
-        rec_pos_list.append(item['rec_pos'])
+        lig_pos_list.append(zerocopy_from_numpy(item['lig_pos'].astype(np.float32)))
+        rec_pos_list.append(zerocopy_from_numpy(item['rec_pos'].astype(np.float32)))
 
-        lig_atom_list.append(item['lig_atom'])
-        rec_atom_list.append( item['rec_atom'])
+        lig_atom_list.append(zerocopy_from_numpy(item['lig_atom'].astype(np.int64)))
+        rec_atom_list.append(zerocopy_from_numpy(item['rec_atom'].astype(np.int64)))
         lig_seq_list.append(item['lig_seq'])
         rec_seq_list.append(item['rec_seq'])
         bsp_lig_list.append(item['bsp_lig'])
@@ -295,10 +287,10 @@ def training_dataset(args):
     alignment_model.load_state_dict(torch.load(aligment_path, map_location=args['device']), strict=False)
     print("alignment network load completed")
     
-    train_dataset = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='train', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
+    train_dataset = DockingDataset(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='train', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
     train_dataloader = DataLoader(train_dataset, batch_size=args['bs'], shuffle=True, collate_fn=batchify_and_create_respective_graphs)
     
-    val_dataset = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='val', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
+    val_dataset = DockingDataset(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='val', load_from_cache=True, raw_data_path=args['data_path'], bound_type='bound')
     val_dataloader = DataLoader(val_dataset, batch_size=args['bs'], shuffle=False, collate_fn=batchify_and_create_respective_graphs)
         
     return train_dataloader, val_dataloader
@@ -313,13 +305,13 @@ def test_dataset(args):
     alignment_model.load_state_dict(torch.load(aligment_path, map_location=args['device']), strict=False)
     print("alignment network load completed")
     
-    test_dataset_native_bound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_bound')
+    test_dataset_native_bound = DockingDataset(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_bound')
     test_dataloader_native_bound = DataLoader(test_dataset_native_bound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
-    test_dataset_unbound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='unbound')
+    test_dataset_unbound = DockingDataset(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='unbound')
     test_dataloader_unbound = DataLoader(test_dataset_unbound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
     
-    test_dataset_native_unbound = DockingDataset_aug_align(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_unbound')
+    test_dataset_native_unbound = DockingDataset(args, alignment_model=alignment_model, data_set=args['dataset'], reload_mode='test', load_from_cache=True, raw_data_path=args['data_path'], bound_type='native_unbound')
     test_dataloader_native_unbound = DataLoader(test_dataset_native_unbound, batch_size=1, shuffle=False, collate_fn=batchify_and_create_respective_graphs)
 
     return test_dataloader_native_bound, test_dataloader_unbound, test_dataloader_native_unbound
