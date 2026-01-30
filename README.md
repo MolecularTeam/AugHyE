@@ -62,10 +62,7 @@ python test.py
 Data construction & unbound structure augmentation code will be available.
 
 ## Dataset:
-Our test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
-
-The training and validation datasets will be available.
-
+Our Train/val/test dataset for this project can be found here: [Open in Colab](https://drive.google.com/drive/folders/1FDCqtaoE3U4c_k3Zzu75uGhORUABAnkS?usp=drive_link)
 
 ### Important Note
 As of January 20, 2026, the test code has been updated and is working correctly.
