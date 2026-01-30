@@ -20,7 +20,7 @@ if __name__ == "__main__":
     # model save
     save_dir = f"save/"
     os.makedirs(save_dir, exist_ok=True)
-    best_model_save_path = save_dir + f"bsp_best_{args['timestamp']}.pt"
+    best_model_save_path = save_dir + f"AugHyE_best_{args['timestamp']}.pt"
         
     print(f"Timestamp: {args['timestamp']}")
     print(f"args: {str(args)}")
