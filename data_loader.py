@@ -98,9 +98,6 @@ class DockingDataset(Dataset):
             elif structure_type == 'generated':
                 self.data = _load_pkl(data_path, f'{reload_mode}_esm3.pkl')
                 self._alignment(self.data)
-            elif structure_type == 'generated_aligned':
-                self.data = _load_pkl(data_path, f'{reload_mode}_esm3_aligned.pkl')
-                self._alignment(self.data)
             else:
                 raise ValueError(f"unknown structure_type {structure_type!r}")
 
