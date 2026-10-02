@@ -3,10 +3,6 @@ Official implementation of "AugHyE: generated structure augmentation with hybrid
 
 **TL;DR:** We propose AugHyE, a novel framework that integrates generated structure augmentation with a Hybrid Encoder to enhance model robustness to structural variations. 
 
-## Abstract
-Protein binding interface (PBI) prediction is essential for elucidating biological mechanisms and accelerating drug discovery. Recent deep learning methods have achieved substantial performance improvements in identifying residues involved in protein interactions. However, their performance often degrades when applied to unbound structures, since these models are typically trained primarily on native bound structures and may not generalize well to structural variations. To address this limitation, we propose AugHyE, a novel framework that integrates generated structure augmentation with a Hybrid Encoder to enhance model robustness by expanding the training distribution beyond native bound structures. Our approach leverages ESM3 to generate protein structures from pro- tein sequences and incorporates an alignment network to reduce spatial overlap and adjust the relative positioning between the independently generated ligand and receptor structures. These aligned generated structures are com- bined with native bound structures to construct a unified training dataset, which is used to train the Hybrid Encoder that integrates local geometric features with global struc- tural context. We evaluate AugHyE on two PBI prediction benchmarks and achieve strong performance across multiple structural test settings, supporting its robustness to structural variation.
-
-
 ## Conda activation:
 A Conda virtual environment setup will be available.
 
