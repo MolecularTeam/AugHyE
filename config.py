@@ -38,9 +38,9 @@ def parseArgs(argv=None):
     parser.add_argument('-leakyrelu_neg_slope', type=float, default=1.0, required=False)
 
     parser.add_argument('-ckpt', type=str,
-                        default='model_weight/AugHyE_best.pt', required=False)
+                        default='model_weight/AugHyE_model.pt', required=False)
     parser.add_argument('-alignment_ckpt', type=str,
-                        default='model_weight/alignment_model_best.pth', required=False)
+                        default='model_weight/alignment_model.pth', required=False)
 
     parser.add_argument('-save_path', type=str, default='save/', required=False)
 
