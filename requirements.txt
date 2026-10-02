@@ -1,0 +1,57 @@
+# AugHyE dependencies: train.py, test.py, data_preprocess.py and esm3_generation.py.
+# Python 3.10, Linux x86_64, CUDA 11.8, NVIDIA GPU required.
+#
+#   conda create -n aughye python=3.10 -y
+#   conda activate aughye
+#   pip install -r requirements.txt
+
+--extra-index-url https://download.pytorch.org/whl/cu118
+--find-links https://data.dgl.ai/wheels/torch-2.1/cu118/repo.html
+--find-links https://data.pyg.org/whl/torch-2.1.0+cu118.html
+
+# numpy stays below 2.0: the dgl and PyG extensions are built against the 1.x ABI.
+torch==2.1.0+cu118
+numpy==1.23.5
+
+# Graph
+dgl==2.4.0+cu118
+torch-geometric==2.7.0
+torch_scatter==2.1.2+pt21cu118
+torch_cluster==1.6.2+pt21cu118
+e3nn==0.5.0
+
+# State-space encoder. These are prebuilt CUDA wheels, so nvcc is not needed;
+# abiFALSE matches torch's _GLIBCXX_USE_CXX11_ABI=0. For a different
+# Python/torch/CUDA combination pick another wheel from the same release pages,
+# or build from source with causal-conv1d installed first.
+causal_conv1d @ https://github.com/Dao-AILab/causal-conv1d/releases/download/v1.4.0/causal_conv1d-1.4.0%2Bcu118torch2.1cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+mamba_ssm @ https://github.com/state-spaces/mamba/releases/download/v2.2.2/mamba_ssm-2.2.2%2Bcu118torch2.1cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+transformers==4.38.2
+
+# data_preprocess.py, which rebuilds the pickles from the PDB files.
+fair-esm==2.0.0
+biopandas==0.2.8
+
+# Numerics and metrics
+scipy==1.15.3
+pandas==1.5.1
+scikit-learn==1.2.2
+tqdm==4.67.3
+
+# esm3_generation.py, which regenerates the ESM3 structures. The ESM3 SDK itself is
+# vendored in esmv3/ and needs no package: it is the EvolutionaryScale `esm` repository
+# with the directory and its imports renamed to esmv3, so it does not collide with the
+# fair-esm `esm` module above. esm3_sm_open_v1 is gated, so accept the licence on Hugging
+# Face and then run `huggingface-cli login` or export HF_TOKEN.
+#
+# biotite stays at 0.41.2, the version esmv3 pins. biotite 1.x requires numpy >= 1.25 and
+# would pull in numpy 2.x, breaking the dgl and PyG extensions.
+attrs==26.1.0
+einops==0.8.2
+huggingface-hub==0.36.2
+biotite==0.41.2
+biopython==1.87
+msgpack-numpy==0.4.8
+Brotli==1.2.0
+cloudpathlib==0.24.0
+tenacity==9.1.4
